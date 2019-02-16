@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeeplus.modules.gen.mapper.GenTableMapper">
+    
+	<sql id="genTableColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.comments AS "comments",
+		a.class_name AS "className",
+		a.parent_table AS "parentTable",
+		a.parent_table_fk AS "parentTableFk",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.issync AS "issync",
+		a.table_type AS "tableType",
+		a.old_name AS "oldName",
+		a.old_comments AS "oldComments",
+		a.gen_id_type AS "genIdType",
+		a.old_gen_id_type AS "oldGenIdType"
+	</sql>
+	
+	<sql id="genTableJoins">
+		
+	</sql>
+	
+    
+	<select id="get" resultType="GenTable" >
+		SELECT 
+			<include refid="genTableColumns"/>
+		FROM gen_table a
+		<include refid="genTableJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="GenTable" >
+		SELECT 
+			<include refid="genTableColumns"/>
+		FROM gen_table a
+		<include refid="genTableJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="GenTable" >
+		SELECT 
+			<include refid="genTableColumns"/>
+		FROM gen_table a
+		<include refid="genTableJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			${dataScope}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO gen_table(
+			id,
+			name,
+			comments,
+			class_name,
+			parent_table,
+			parent_table_fk,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			issync,
+			table_type,
+			old_name,
+			old_comments,
+			gen_id_type,
+			old_gen_id_type
+		) VALUES (
+			#{id},
+			#{name},
+			#{comments},
+			#{className},
+			#{parentTable},
+			#{parentTableFk},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{issync},
+			#{tableType},
+			#{oldName},
+			#{oldComments},
+			#{genIdType},
+			#{oldGenIdType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE gen_table SET 	
+			name = #{name},
+			comments = #{comments},
+			class_name = #{className},
+			parent_table = #{parentTable},
+			parent_table_fk = #{parentTableFk},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			issync = #{issync},
+			table_type = #{tableType},
+			old_name = #{oldName},
+			old_comments = #{oldComments},
+			gen_id_type = #{genIdType},
+			old_gen_id_type = #{oldGenIdType}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!--物理删除-->
+	<update id="delete">
+		DELETE FROM gen_table
+		WHERE id = #{id}
+	</update>
+	
+	<!--逻辑删除-->
+	<update id="deleteByLogic">
+		UPDATE gen_table SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+	
+	<!-- 根据实体名称和字段名称和字段值获取唯一记录 -->
+	<select id="findUniqueByProperty" resultType="GenTable" statementType="STATEMENT">
+		select * FROM gen_table  where ${propertyName} = '${value}'
+	</select>
+	
+</mapper>
